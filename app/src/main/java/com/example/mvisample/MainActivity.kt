@@ -18,8 +18,7 @@ import com.example.mvisample.ui.theme.MVISampleTheme
 import com.example.mvisample.view.TaskListComponent
 import com.example.mvisample.viewModel.TaskListViewModel
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.*
 
 
 @AndroidEntryPoint
@@ -31,7 +30,13 @@ class MainActivity : ComponentActivity(), CoroutineScope by MainScope() {
             MVISampleTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(color = MaterialTheme.colors.background) {
+                    val taskListComponentViewModel: TaskListViewModel = viewModel()
                     MainContainer()
+                    launch(Dispatchers.Default) {
+                        withContext(coroutineContext) {
+                            taskListComponentViewModel.fetchTaskList()
+                        }
+                    }
                 }
             }
         }

@@ -10,8 +10,13 @@ fun TaskListComponent(taskListState: TaskListState?) {
     Column {
         when (taskListState) {
             is TaskListState.Loading -> Text("Loading ...")
-            is TaskListState.Success -> repeat(taskListState.tasks.count()) { index ->
-                Text(taskListState.tasks[index].name)
+            is TaskListState.Success -> {
+                if(taskListState.tasks.isEmpty())
+                    Text("No data")
+                else
+                    repeat(taskListState.tasks.count()) { index ->
+                        Text(taskListState.tasks[index].name)
+                    }
             }
             is TaskListState.Error -> Text("Error while fetching data")
         }

@@ -8,20 +8,22 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.mvisample.ui.theme.MVISampleTheme
 import com.example.mvisample.view.TaskListComponent
 import com.example.mvisample.viewModel.TaskListViewModel
-import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
+import org.koin.androidx.compose.get
 
 
-@AndroidEntryPoint
 class MainActivity : ComponentActivity(), CoroutineScope by MainScope() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -30,13 +32,7 @@ class MainActivity : ComponentActivity(), CoroutineScope by MainScope() {
             MVISampleTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(color = MaterialTheme.colors.background) {
-                    val taskListComponentViewModel: TaskListViewModel = viewModel()
                     MainContainer()
-                    launch(Dispatchers.Default) {
-                        withContext(coroutineContext) {
-                            taskListComponentViewModel.fetchTaskList()
-                        }
-                    }
                 }
             }
         }
@@ -44,15 +40,18 @@ class MainActivity : ComponentActivity(), CoroutineScope by MainScope() {
 }
 
 @Composable
-fun MainContainer() {
+fun MainContainer(taskListComponentViewModel: TaskListViewModel = get()) {
     val navController = rememberNavController()
     Scaffold {
         NavHost(navController, startDestination = "tasklist") {
             composable("tasklist") {
-                val taskListComponentViewModel: TaskListViewModel = viewModel()
-                val taskListState by taskListComponentViewModel.uiState.observeAsState()
+                val taskListState by remember { mutableStateOf(taskListComponentViewModel.uiState) }
                 TaskListComponent(taskListState)
             }
+        }
+    }.also {
+        MainScope().launch(Dispatchers.Default) {
+            taskListComponentViewModel.fetchTaskList()
         }
     }
 }

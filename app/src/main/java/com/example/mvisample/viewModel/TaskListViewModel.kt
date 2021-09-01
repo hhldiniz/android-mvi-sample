@@ -2,6 +2,7 @@ package com.example.mvisample.viewModel
 
 import androidx.lifecycle.ViewModel
 import com.example.mvisample.Database
+import com.example.mvisample.model.Task
 import com.example.mvisample.view.state.TaskListState
 
 class TaskListViewModel(private val database: Database): ViewModel() {

@@ -1,4 +1,4 @@
-package com.example.mvisample.view.state
+package com.example.mvisample.model.state
 
 import com.example.mvisample.model.Task
 import java.lang.Exception

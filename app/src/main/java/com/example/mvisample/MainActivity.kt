@@ -3,15 +3,9 @@ package com.example.mvisample
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorMatrix
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Surface
+import androidx.compose.runtime.*
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -19,6 +13,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.mvisample.ui.theme.MVISampleTheme
 import com.example.mvisample.view.NewTask
 import com.example.mvisample.view.TaskListComponent
+import com.example.mvisample.view.intent.TaskListIntent
 import com.example.mvisample.viewModel.TaskListViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -33,6 +28,7 @@ class MainActivity : ComponentActivity(), CoroutineScope by MainScope() {
         super.onCreate(savedInstanceState)
         setContent {
             MVISampleTheme {
+                rememberCoroutineScope { coroutineContext }
                 // A surface container using the 'background' color from the theme
                 Surface(color = MaterialTheme.colors.background) {
                     MainContainer()
@@ -45,13 +41,14 @@ class MainActivity : ComponentActivity(), CoroutineScope by MainScope() {
 @Composable
 fun MainContainer(taskListComponentViewModel: TaskListViewModel = get()) {
     val navController = rememberNavController()
+    val coroutineScope = rememberCoroutineScope()
     NavHost(navController, startDestination = "tasklist") {
         composable("tasklist") {
-            val taskListState by remember { mutableStateOf(taskListComponentViewModel.uiState) }
+            val taskListState by remember { mutableStateOf(taskListComponentViewModel.state) }
             TaskListComponent(taskListState, navController)
         }.also {
-            MainScope().launch(Dispatchers.Default) {
-                taskListComponentViewModel.fetchTaskList()
+            coroutineScope.launch(Dispatchers.Default) {
+                taskListComponentViewModel.taskListIntent.send(TaskListIntent.FetchTaskList)
             }
         }
         composable("newtask") {

@@ -10,7 +10,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavController
-import com.example.mvisample.view.state.TaskListState
+import com.example.mvisample.model.state.TaskListState
 
 @Composable
 fun TaskListComponent(taskListState: TaskListState?, navController: NavController) {

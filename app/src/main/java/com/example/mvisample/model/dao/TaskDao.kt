@@ -9,6 +9,9 @@ interface TaskDao {
     @Query("SELECT * FROM Task")
     fun getAll(): List<Task>
 
+    @Query("SELECT * FROM Task WHERE uuid = :uuid")
+    fun getTaskById(uuid: String): Task?
+
     @Insert
     fun insert(vararg tasks: Task)
 

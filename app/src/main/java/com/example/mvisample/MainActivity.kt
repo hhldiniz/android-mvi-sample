@@ -13,7 +13,9 @@ import androidx.navigation.compose.rememberNavController
 import com.example.mvisample.ui.theme.MVISampleTheme
 import com.example.mvisample.view.NewTask
 import com.example.mvisample.view.TaskListComponent
+import com.example.mvisample.view.intent.NewTaskIntent
 import com.example.mvisample.view.intent.TaskListIntent
+import com.example.mvisample.viewModel.NewTaskViewModel
 import com.example.mvisample.viewModel.TaskListViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -39,7 +41,10 @@ class MainActivity : ComponentActivity(), CoroutineScope by MainScope() {
 }
 
 @Composable
-fun MainContainer(taskListComponentViewModel: TaskListViewModel = get()) {
+fun MainContainer(
+    taskListComponentViewModel: TaskListViewModel = get(),
+    newTaskViewModel: NewTaskViewModel = get()
+) {
     val navController = rememberNavController()
     val coroutineScope = rememberCoroutineScope()
     NavHost(navController, startDestination = "tasklist") {
@@ -52,7 +57,12 @@ fun MainContainer(taskListComponentViewModel: TaskListViewModel = get()) {
             }
         }
         composable("newtask") {
-            NewTask()
+            val newTaskState by remember { mutableStateOf(newTaskViewModel.state) }
+            NewTask(newTaskState, null)
+        }.also {
+            coroutineScope.launch(Dispatchers.Default) {
+                newTaskViewModel.newTaskIntent.send(NewTaskIntent.FetchTaskDetails(null))
+            }
         }
     }
 }

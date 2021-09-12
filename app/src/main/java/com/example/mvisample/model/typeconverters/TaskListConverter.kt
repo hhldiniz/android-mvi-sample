@@ -9,8 +9,7 @@ object TaskListConverter {
     @TypeConverter
     fun fromMutableList(list: MutableList<TaskItem>): String {
         return list.joinToString {
-            "{'uuid': '${it.uuid}', 'description': '${it.description}', " +
-                    "'done': ${if (it.done) "true" else "false"}}"
+            "{'uuid': '${it.uuid}', 'description': '${it.description}', 'done': ${if (it.done) "true" else "false"}}"
         }
     }
 

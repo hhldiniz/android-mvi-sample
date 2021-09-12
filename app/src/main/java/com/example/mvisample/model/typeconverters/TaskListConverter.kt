@@ -16,17 +16,18 @@ object TaskListConverter {
     @TypeConverter
     fun toMutableList(stringRepresentation: String): MutableList<TaskItem> {
         val parsedList = mutableListOf<TaskItem>()
-        stringRepresentation.split(",").forEach {
-            JSONObject(it).apply {
-                parsedList.add(
-                    TaskItem(
-                        getString("uuid"),
-                        getString("description"),
-                        getString("done") == "true"
+        if (stringRepresentation.isNotEmpty())
+            stringRepresentation.split(",").forEach {
+                JSONObject(it).apply {
+                    parsedList.add(
+                        TaskItem(
+                            getString("uuid"),
+                            getString("description"),
+                            getString("done") == "true"
+                        )
                     )
-                )
+                }
             }
-        }
         return parsedList
     }
 }

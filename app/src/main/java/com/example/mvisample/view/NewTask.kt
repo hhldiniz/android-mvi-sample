@@ -1,6 +1,5 @@
 package com.example.mvisample.view
 
-import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -31,13 +30,34 @@ fun NewTask(newTaskState: NewTaskState, task: Task?, newTaskViewModel: NewTaskVi
             when (newTaskState) {
                 is NewTaskState.Loading -> Text("Loading ...")
                 is NewTaskState.Success -> {
+                    var taskDescriptionState by remember {
+                        mutableStateOf(newTaskState.task?.name)
+                    }
                     Card(modifier = Modifier.padding(Dp(8f))) {
                         TextField(
-                            "",
+                            taskDescriptionState.orEmpty(),
                             label = {
                                 Text("Task name")
                             }, onValueChange = { newValue ->
-                                Log.d("textValue", newValue)
+                                taskDescriptionState = newValue
+                                newTaskState.task?.apply {
+                                    name = newValue
+                                    coroutineScope.launch(Dispatchers.Default) {
+                                        newTaskViewModel.newTaskIntent.send(
+                                            NewTaskIntent.UpdateTask(
+                                                this@apply
+                                            )
+                                        )
+                                    }
+                                    return@apply
+                                }
+                                coroutineScope.launch(Dispatchers.Default) {
+                                    newTaskViewModel.newTaskIntent.send(
+                                        NewTaskIntent.AddTask(
+                                            taskDescriptionState.orEmpty()
+                                        )
+                                    )
+                                }
                             }, modifier = Modifier
                                 .fillMaxWidth()
                                 .then(Modifier.padding(Dp(8f)))
@@ -51,26 +71,35 @@ fun NewTask(newTaskState: NewTaskState, task: Task?, newTaskViewModel: NewTaskVi
                             Column {
                                 newTaskState.task?.items?.let { items ->
                                     repeat(items.count()) { index ->
+                                        var itemState by remember {
+                                            mutableStateOf(items[index])
+                                        }
                                         Row {
-                                            Checkbox(items[index].done, { checked ->
+                                            Checkbox(itemState.done, { checked ->
                                                 coroutineScope.launch(Dispatchers.Default) {
                                                     newTaskViewModel.newTaskIntent.send(
                                                         NewTaskIntent.UpdateTaskItem(
-                                                            items[index].apply {
+                                                            itemState.apply {
                                                                 done = checked
-                                                            })
+                                                            }.also {
+                                                                itemState = it
+                                                            }
+                                                        )
                                                     )
                                                 }
                                             })
                                             TextField(
-                                                value = items[index].description,
+                                                value = itemState.description,
                                                 onValueChange = { newDescription ->
                                                     coroutineScope.launch(Dispatchers.Default) {
                                                         newTaskViewModel.newTaskIntent.send(
                                                             NewTaskIntent.UpdateTaskItem(
-                                                                items[index].apply {
+                                                                itemState.apply {
                                                                     description = newDescription
-                                                                })
+                                                                }.also {
+                                                                    itemState = it
+                                                                }
+                                                            )
                                                         )
                                                     }
                                                 }

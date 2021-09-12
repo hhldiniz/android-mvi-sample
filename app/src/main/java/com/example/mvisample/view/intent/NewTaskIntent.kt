@@ -1,5 +1,6 @@
 package com.example.mvisample.view.intent
 
+import com.example.mvisample.model.Task
 import com.example.mvisample.model.TaskItem
 
 sealed class NewTaskIntent {
@@ -10,5 +11,6 @@ sealed class NewTaskIntent {
         val taskDescription: String
     ) : NewTaskIntent()
     data class AddTask(val description: String): NewTaskIntent()
+    data class UpdateTask(val task: Task): NewTaskIntent()
     data class UpdateTaskItem(val taskItem: TaskItem): NewTaskIntent()
 }

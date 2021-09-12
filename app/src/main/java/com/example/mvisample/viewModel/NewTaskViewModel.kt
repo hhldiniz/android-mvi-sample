@@ -32,6 +32,7 @@ class NewTaskViewModel(private val database: Database) : ViewModel() {
                         it.taskDescription
                     )
                     is NewTaskIntent.AddTask -> addTask(it.description)
+                    is NewTaskIntent.UpdateTask -> updateTask(it.task)
                     is NewTaskIntent.UpdateTaskItem -> updateTaskItem(it.taskItem)
                 }
             }
@@ -57,6 +58,20 @@ class NewTaskViewModel(private val database: Database) : ViewModel() {
                 with(database.getTaskDao()) {
                     insert(newTask)
                     return@with NewTaskState.Success(newTask)
+                }
+            } catch (e: Exception) {
+                NewTaskState.Error(e)
+            }
+        }
+    }
+
+    private fun updateTask(task: Task) {
+        state = NewTaskState.Loading
+        viewModelScope.launch(Dispatchers.Default) {
+            state = try {
+                with(database.getTaskDao()) {
+                    update(task)
+                    return@with NewTaskState.Success(task)
                 }
             } catch (e: Exception) {
                 NewTaskState.Error(e)
